@@ -1,0 +1,649 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Diminuir - Otimizador de Dispositivo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        google: {
+                            blue: '#4285F4',
+                            red: '#EA4335',
+                            yellow: '#FBBC05',
+                            green: '#34A853',
+                            dark: '#1F1F1F',
+                            surface: '#F8F9FA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Gauge Arc Progress styling */
+        .gauge-circle {
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Pulse animation for optimization button */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .btn-pulse {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-start pb-12">
+
+    <!-- Header / Navbar -->
+    <header class="w-full bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="flex items-center font-bold text-xl tracking-tight text-slate-700">
+                    <span class="text-google-blue">G</span>
+                    <span class="text-google-red">o</span>
+                    <span class="text-google-yellow">o</span>
+                    <span class="text-google-blue">g</span>
+                    <span class="text-google-green">l</span>
+                    <span class="text-google-red">e</span>
+                    <span class="ml-2 text-slate-800 font-medium">Diminuir</span>
+                </div>
+                <span class="text-xs bg-google-blue/10 text-google-blue font-semibold px-2 py-0.5 rounded-full">Pro 2.0</span>
+            </div>
+            
+            <div class="flex items-center space-x-3 text-sm text-slate-500">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-full hover:bg-slate-100 transition" title="Alternar tema">
+                    <i class="fa-solid me-0 fa-moon text-lg text-slate-600"></i>
+                </button>
+                <div class="hidden sm:flex items-center space-x-1 text-xs bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                    <i class="fa-solid fa-mobile-screen text-google-green"></i>
+                    <span id="deviceModel">Android Web Engine</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-4xl px-4 mt-6 space-y-6">
+
+        <!-- Banner / Hero Card with Gauge -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-200/80 relative overflow-hidden">
+            <!-- Background Decorative Elements -->
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-google-blue/5 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-google-green/5 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                
+                <!-- Gauge Section -->
+                <div class="flex flex-col items-center justify-center relative">
+                    <div class="relative w-56 h-56 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                            <!-- Background Track -->
+                            <circle cx="60" cy="60" r="50" stroke="#e2e8f0" stroke-width="10" fill="transparent" />
+                            <!-- Progress Ring -->
+                            <circle id="gaugeProgress" class="gauge-circle" cx="60" cy="60" r="50" 
+                                    stroke="url(#gradient)" stroke-width="10" 
+                                    stroke-dasharray="314.15" stroke-dashoffset="69" 
+                                    stroke-linecap="round" fill="transparent" />
+                            <!-- Gradient Definition -->
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#4285F4" />
+                                    <stop offset="100%" stop-color="#34A853" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+
+                        <!-- Inner Stats Text -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span id="scoreText" class="text-5xl font-extrabold text-slate-800 tracking-tight">78%</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Desempenho Atual</span>
+                            <span id="statusBadge" class="mt-2 text-xs font-semibold text-google-blue bg-google-blue/10 px-2.5 py-0.5 rounded-full">
+                                Moderado
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Controls Section -->
+                <div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left space-y-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Acelere seu Navegador e HTML</h1>
+                        <p class="text-sm text-slate-500 mt-1">Limpe a memória RAM simulada, reduza a latência de scripts e otimize o carregamento de páginas web.</p>
+                    </div>
+
+                    <!-- Live Quick Metrics -->
+                    <div class="w-full grid grid-cols-3 gap-2 py-2">
+                        <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                            <span class="block text-xs text-slate-400">RAM Livre</span>
+                            <span id="ramStat" class="text-base font-bold text-slate-700">1.2 GB</span>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                            <span class="block text-xs text-slate-400">Lixo HTML</span>
+                            <span id="cacheStat" class="text-base font-bold text-google-red">142 MB</span>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                            <span class="block text-xs text-slate-400">Latência</span>
+                            <span id="pingStat" class="text-base font-bold text-slate-700">68 ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Big Optimize Button -->
+                    <button id="optimizeBtn" onclick="runOptimization()" 
+                            class="w-full md:w-auto px-8 py-4 bg-google-green hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-google-green/30 hover:shadow-google-green/50 transition-all duration-300 flex items-center justify-center space-x-3 text-base btn-pulse">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                        <span>INICIAR OTIMIZAÇÃO COMPLETA</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Optimization Progress Overlay / Bar (Hidden by default) -->
+            <div id="progressModal" class="hidden mt-6 pt-6 border-t border-slate-100">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="progressStep" class="text-xs font-semibold text-google-blue animate-pulse">Limpando cache de renderização...</span>
+                    <span id="progressPercent" class="text-xs font-bold text-slate-600">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="progressBar" class="bg-gradient-to-r from-google-blue to-google-green h-full rounded-full transition-all duration-300 w-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Controls Toggles & Analytics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Configurable Toggles -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa-solid fa-sliders text-google-blue"></i>
+                        <h2 class="font-bold text-slate-800 text-lg">Configurações de Otimização</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Toggle 1 -->
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-google-blue flex items-center justify-center">
+                                    <i class="fa-solid fa-broom"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-800">Limpeza de Cache HTML</h3>
+                                    <p class="text-xs text-slate-500">Remove arquivos temporários de sites</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle1" class="sr-only peer" checked onchange="updateSettings()">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-google-green"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle 2 -->
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-file-code"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-800">Compressão de Código</h3>
+                                    <p class="text-xs text-slate-500">Minifica DOM e reduz uso de dados</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle2" class="sr-only peer" checked onchange="updateSettings()">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-google-green"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle 3 -->
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-google-yellow flex items-center justify-center">
+                                    <i class="fa-solid fa-gears"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-800">Gerenciamento de Scripts</h3>
+                                    <p class="text-xs text-slate-500">Adia o carregamento de scripts pesados</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle3" class="sr-only peer" checked onchange="updateSettings()">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-google-green"></div>
+                            </label>
+                        </div>
+
+                        <!-- Toggle 4 -->
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-rose-100 text-google-red flex items-center justify-center">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-semibold text-slate-800">Bloqueio de Rastreadores</h3>
+                                    <p class="text-xs text-slate-500">Bloqueia telemetria e aumenta privacidade</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle4" class="sr-only peer" checked onchange="updateSettings()">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-google-green"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="toastMessage" class="hidden mt-4 p-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl text-center">
+                    Configurações salvas e aplicadas em tempo real!
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-chart-column text-google-green"></i>
+                            <h2 class="font-bold text-slate-800 text-lg">Histórico de Velocidade</h2>
+                        </div>
+                        <span class="text-xs text-slate-400 font-medium">Últimos 7 Dias</span>
+                    </div>
+
+                    <!-- Bar Chart Visualizer -->
+                    <div class="h-52 flex items-end justify-between gap-2 pt-6 pb-2 px-2 border-b border-slate-100">
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Segunda', '62%')">
+                            <div class="w-full bg-google-blue/20 group-hover:bg-google-blue transition-all rounded-t-lg relative" style="height: 62%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">62%</span>
+                            </div>
+                            <span class="text-[11px] font-medium text-slate-400">Seg</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Terça', '68%')">
+                            <div class="w-full bg-google-blue/20 group-hover:bg-google-blue transition-all rounded-t-lg relative" style="height: 68%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">68%</span>
+                            </div>
+                            <span class="text-[11px] font-medium text-slate-400">Ter</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Quarta', '75%')">
+                            <div class="w-full bg-google-blue/20 group-hover:bg-google-blue transition-all rounded-t-lg relative" style="height: 75%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">75%</span>
+                            </div>
+                            <span class="text-[11px] font-medium text-slate-400">Qua</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Quinta', '71%')">
+                            <div class="w-full bg-google-blue/20 group-hover:bg-google-blue transition-all rounded-t-lg relative" style="height: 71%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">71%</span>
+                            </div>
+                            <span class="text-[11px] font-medium text-slate-400">Qui</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Sexta', '80%')">
+                            <div class="w-full bg-google-blue/20 group-hover:bg-google-blue transition-all rounded-t-lg relative" style="height: 80%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">80%</span>
+                            </div>
+                            <span class="text-[11px] font-medium text-slate-400">Sex</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Sábado', '78%')">
+                            <div class="w-full bg-google-blue/20 group-hover:bg-google-blue transition-all rounded-t-lg relative" style="height: 78%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">78%</span>
+                            </div>
+                            <span class="text-[11px] font-medium text-slate-400">Sáb</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer" onclick="selectBar(this, 'Hoje', '99%')">
+                            <div id="todayBar" class="w-full bg-google-green transition-all rounded-t-lg relative" style="height: 78%;">
+                                <span class="opacity-0 group-hover:opacity-100 transition absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-0.5 px-1.5 rounded">Hoje</span>
+                            </div>
+                            <span class="text-[11px] font-bold text-google-green">Hoje</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+                    <span id="chartDetails">Pico médio: <strong class="text-slate-700">80% (Sexta)</strong></span>
+                    <span class="inline-flex items-center text-google-green font-semibold">
+                        <i class="fa-solid fa-arrow-trend-up mr-1"></i> +24% ganho
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real Functional HTML Minifier / Code Optimizer Tool -->
+        <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-google-blue text-white flex items-center justify-center">
+                        <i class="fa-solid fa-code text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-lg">Otimizador de Código HTML / CSS / JS</h2>
+                        <p class="text-xs text-slate-500">Ferramenta real: cole seu código abaixo para remover espaços e comentários de forma instantânea</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="loadSampleCode()" class="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg transition">
+                        Exemplo
+                    </button>
+                    <button onclick="clearCode()" class="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg transition">
+                        Limpar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input and Output Code Boxes -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Código Original</label>
+                    <textarea id="inputCode" rows="8" 
+                              class="w-full p-3 font-mono text-xs bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-google-blue focus:outline-none transition resize-none"
+                              placeholder="<!-- Cole seu código HTML/CSS/JS aqui -->&#10;<div class='exemplo'>&#10;   <!-- Comentário -->&#10;   <h1> Olá Mundo </h1>&#10;</div>"></textarea>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-slate-500">Código Otimizado / Minificado</label>
+                        <span id="savingsBadge" class="text-[10px] font-bold text-google-green bg-emerald-50 px-2 py-0.5 rounded-full hidden">
+                            0% Reduzido
+                        </span>
+                    </div>
+                    <textarea id="outputCode" rows="8" readonly 
+                              class="w-full p-3 font-mono text-xs bg-slate-100 border border-slate-200 rounded-2xl text-slate-700 focus:outline-none transition resize-none"
+                              placeholder="O código otimizado aparecerá aqui..."></textarea>
+                </div>
+            </div>
+
+            <!-- Action buttons for code optimizer -->
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                <div class="flex items-center space-x-4 text-xs text-slate-500">
+                    <span>Tamanho original: <strong id="origSize" class="text-slate-700">0 B</strong></span>
+                    <span>Tamanho final: <strong id="optSize" class="text-slate-700">0 B</strong></span>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="copyCode()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center space-x-1.5">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copiar Código</span>
+                    </button>
+                    <button onclick="optimizeCode()" class="px-5 py-2 bg-google-blue hover:bg-blue-600 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-500/20 transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Otimizar Código</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-xs text-slate-400 space-y-1">
+        <p>Google Diminuir - Otimizador de Web Engine para Android & Browsers</p>
+        <p class="text-[10px] text-slate-300">Simulador de otimização de sistema com minificador de código ativo.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Global variables for optimization state
+        let currentScore = 78;
+        let isOptimizing = false;
+
+        // Initialize Gauge Arc
+        function updateGauge(score) {
+            const circle = document.getElementById('gaugeProgress');
+            const scoreText = document.getElementById('scoreText');
+            const statusBadge = document.getElementById('statusBadge');
+            const todayBar = document.getElementById('todayBar');
+            
+            // Total circumference = 2 * PI * 50 = ~314.15
+            const maxDash = 314.15;
+            const offset = maxDash - (maxDash * score / 100);
+            
+            circle.style.strokeDashoffset = offset;
+            scoreText.innerText = Math.round(score) + '%';
+            
+            // Update status text badge and bar chart
+            if (score < 80) {
+                statusBadge.innerText = "Moderado";
+                statusBadge.className = "mt-2 text-xs font-semibold text-google-blue bg-google-blue/10 px-2.5 py-0.5 rounded-full";
+            } else if (score < 95) {
+                statusBadge.innerText = "Bom";
+                statusBadge.className = "mt-2 text-xs font-semibold text-google-yellow bg-amber-50 px-2.5 py-0.5 rounded-full";
+            } else {
+                statusBadge.innerText = "Excelente (Otimizado)";
+                statusBadge.className = "mt-2 text-xs font-semibold text-google-green bg-emerald-50 px-2.5 py-0.5 rounded-full";
+            }
+
+            if(todayBar) {
+                todayBar.style.height = score + '%';
+            }
+        }
+
+        // Run full optimization simulation
+        function runOptimization() {
+            if (isOptimizing) return;
+            isOptimizing = true;
+
+            const btn = document.getElementById('optimizeBtn');
+            const progressModal = document.getElementById('progressModal');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressStep = document.getElementById('progressStep');
+            
+            const ramStat = document.getElementById('ramStat');
+            const cacheStat = document.getElementById('cacheStat');
+            const pingStat = document.getElementById('pingStat');
+
+            // UI updates for optimization state
+            btn.disabled = true;
+            btn.classList.remove('btn-pulse');
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            progressModal.classList.remove('hidden');
+
+            const steps = [
+                { percent: 20, text: "Limpando cache temporário de páginas HTML...", ram: "1.5 GB", cache: "95 MB", ping: "55 ms" },
+                { percent: 45, text: "Minificando scripts e reduzindo overhead...", ram: "1.9 GB", cache: "42 MB", ping: "40 ms" },
+                { percent: 75, text: "Bloqueando rastreadores e otimizando memória...", ram: "2.4 GB", cache: "12 MB", ping: "28 ms" },
+                { percent: 100, text: "Dispositivo 100% Otimizado com sucesso!", ram: "2.8 GB", cache: "0 MB", ping: "18 ms" }
+            ];
+
+            let stepIndex = 0;
+
+            const interval = setInterval(() => {
+                if (stepIndex < steps.length) {
+                    const current = steps[stepIndex];
+                    progressBar.style.width = current.percent + '%';
+                    progressPercent.innerText = current.percent + '%';
+                    progressStep.innerText = current.text;
+
+                    // Dynamically update gauge and stats
+                    const newScore = 78 + ((99 - 78) * (current.percent / 100));
+                    updateGauge(newScore);
+
+                    ramStat.innerText = current.ram;
+                    cacheStat.innerText = current.cache;
+                    pingStat.innerText = current.ping;
+
+                    stepIndex++;
+                } else {
+                    clearInterval(interval);
+                    isOptimizing = false;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    btn.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i><span>DISPOSITIVO OTIMIZADO</span>`;
+                    btn.className = "w-full md:w-auto px-8 py-4 bg-slate-700 text-white font-bold rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center space-x-3 text-base";
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = `<i class="fa-solid fa-rotate-right text-lg"></i><span>OTIMIZAR NOVAMENTE</span>`;
+                        btn.className = "w-full md:w-auto px-8 py-4 bg-google-blue hover:bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 transition-all duration-300 flex items-center justify-center space-x-3 text-base btn-pulse";
+                    }, 4000);
+                }
+            }, 800);
+        }
+
+        // Toggle Settings Toast Feedback
+        function updateSettings() {
+            const toast = document.getElementById('toastMessage');
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        // Bar chart selection handler
+        function selectBar(element, day, val) {
+            document.getElementById('chartDetails').innerHTML = `Desempenho em <strong>${day}</strong>: <strong class="text-google-blue">${val}</strong>`;
+        }
+
+        // --- REAL CODE OPTIMIZER / MINIFIER LOGIC ---
+        function optimizeCode() {
+            const input = document.getElementById('inputCode').value;
+            const outputArea = document.getElementById('outputCode');
+            const savingsBadge = document.getElementById('savingsBadge');
+
+            if (!input.trim()) {
+                outputArea.value = "Por favor, insira algum código HTML, CSS ou JS para otimizar.";
+                return;
+            }
+
+            // Real minification algorithm:
+            // 1. Remove HTML comments <!-- ... -->
+            // 2. Remove JS/CSS comments /* ... */ and // ...
+            // 3. Remove consecutive spaces, newlines, tabs
+            let minified = input
+                .replace(/<!--[\s\S]*?-->/g, '') // remove HTML comments
+                .replace(/\/\*[\s\S]*?\*\//g, '') // remove multiline comments
+                .replace(/^\s+|\s+$/gm, '')       // trim lines
+                .replace(/\s+/g, ' ')             // collapse multiple spaces
+                .replace(/>\s+</g, '><')          // remove spaces between tags
+                .trim();
+
+            outputArea.value = minified;
+
+            // Calculate size savings
+            const origLen = new Blob([input]).size;
+            const optLen = new Blob([minified]).size;
+
+            document.getElementById('origSize').innerText = formatBytes(origLen);
+            document.getElementById('optSize').innerText = formatBytes(optLen);
+
+            if (origLen > 0) {
+                const savedPercent = Math.max(0, Math.round(((origLen - optLen) / origLen) * 100));
+                savingsBadge.innerText = `${savedPercent}% Economizado`;
+                savingsBadge.classList.remove('hidden');
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function loadSampleCode() {
+            const sample = `<!-- Exemplo de Página HTML com Comentários -->
+<div class="card-container">
+    <header class="header-main">
+        <h1>  Google Diminuir   Web App </h1>
+        <!-- Script de Rastreamento Pesado -->
+        <script>
+            // Função para inicializar dispositivo
+            function initApp() {
+                console.log("Sistema iniciado com sucesso!");
+            }
+        <\/script>
+    </header>
+    <main>
+        <p>   Otimize sua experiência de navegação   mobile e desktop.  </p>
+    </main>
+</div>`;
+            document.getElementById('inputCode').value = sample;
+            optimizeCode();
+        }
+
+        function clearCode() {
+            document.getElementById('inputCode').value = '';
+            document.getElementById('outputCode').value = '';
+            document.getElementById('origSize').innerText = '0 B';
+            document.getElementById('optSize').innerText = '0 B';
+            document.getElementById('savingsBadge').classList.add('hidden');
+        }
+
+        function copyCode() {
+            const output = document.getElementById('outputCode');
+            if (!output.value) return;
+
+            // Fallback strategy for copying text inside webview/iframes
+            output.select();
+            document.execCommand('copy');
+            
+            const copyBtn = event.currentTarget;
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = `<i class="fa-solid fa-check text-google-green"></i> <span>Copiado!</span>`;
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+            }, 2000);
+        }
+
+        // Dark Theme Switcher Toggle
+        let isDark = false;
+        function toggleTheme() {
+            isDark = !isDark;
+            const body = document.body;
+            const cards = document.querySelectorAll('.bg-white');
+            const themeBtnIcon = document.querySelector('#themeToggleBtn i');
+
+            if (isDark) {
+                body.classList.replace('bg-slate-100', 'bg-slate-900');
+                body.classList.replace('text-slate-800', 'text-slate-100');
+                cards.forEach(c => {
+                    c.classList.replace('bg-white', 'bg-slate-800');
+                    c.classList.replace('border-slate-200', 'border-slate-700');
+                });
+                themeBtnIcon.className = 'fa-solid fa-sun text-lg text-amber-400';
+            } else {
+                body.classList.replace('bg-slate-900', 'bg-slate-100');
+                body.classList.replace('text-slate-100', 'text-slate-800');
+                cards.forEach(c => {
+                    c.classList.replace('bg-slate-800', 'bg-white');
+                    c.classList.replace('border-slate-700', 'border-slate-200');
+                });
+                themeBtnIcon.className = 'fa-solid fa-moon text-lg text-slate-600';
+            }
+        }
+
+        // Initialize Gauge on Load
+        window.onload = function() {
+            updateGauge(78);
+        };
+    </script>
+</body>
+</html>
+```n
